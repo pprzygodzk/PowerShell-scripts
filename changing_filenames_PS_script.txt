@@ -1,0 +1,86 @@
+$prefixOld = "1_1_"
+$prefixNew = "30_01_2026_PES1_"
+
+Get-ChildItem -File | ForEach-Object {
+    $name = $_.BaseName
+    $ext = $_.Extension
+
+    # core = minutes (numbers) OR core = dark
+    # suffix = -01, -02, (FDS), -01(FDS), -02(FDS)
+    if ($name -match "^1_1_((\d+)|dark)(-\d+|\(FDS\)|-\d+\(FDS\))?$") {
+
+        $core = $matches[1]
+        $suffix = $matches[3]
+
+        if (-not $suffix) { $suffix = "" }
+
+        # if core is a number → we add "min"
+        if ($core -match "^\d+$") {
+            $newCore = "${core}min"
+        }
+        else {
+            # core = dark → without "min"
+            $newCore = $core
+        }
+
+        $newName = $prefixNew + $newCore + $suffix + $ext
+        Rename-Item -LiteralPath $_.FullName -NewName $newName
+    }
+}
+
+
+
+
+
+
+
+
+
+
+$prefixStandard = "06_02_2026_PES-PVP2-2_"
+$prefixRetrieve   = "06_02_2026_PES-PVP2-2-retrieval_"
+
+
+Get-ChildItem -File | ForEach-Object {
+    $name = $_.BaseName
+    $ext  = $_.Extension
+
+  
+    if ($name -match "^1_2_((\d+)|d)(-\d+|\(FDS\)|-\d+\(FDS\))?$") {
+        $core   = $matches[1]   # for example: "0" or "dark"
+        $suffix = $matches[3]   # for example: "-01", "(FDS)", "-01(FDS)" or $null
+        if (-not $suffix) { $suffix = "" }
+
+        # if core is a number → we add "min"; if "dark" → make no changes
+        if ($core -match "^\d+$") {
+            $newCore = "${core}min"
+        } else {
+            $newCore = $core
+        }
+
+        $newName = $prefixStandard + $newCore + $suffix + $ext
+        Rename-Item -LiteralPath $_.FullName -NewName $newName
+        return
+    }
+
+
+    if ($name -match "^1_2_((\d+)|d)_([0-9]{8})_([0-9]{6})(-\d+|\(FDS\)|-\d+\(FDS\))?$") {
+        $core   = $matches[1]   # for example: "10" or "dark"
+       
+        $suffix = $matches[5]   # for example: "-01", "(FDS)", "-01(FDS)" or $null
+        if (-not $suffix) { $suffix = "" }
+
+        if ($core -match "^\d+$") {
+            $newCore = "${core}min"
+        } else {
+            $newCore = $core
+        }
+
+
+        $newName = $prefixRetrieve + $newCore + $suffix + $ext
+        Rename-Item -LiteralPath $_.FullName -NewName $newName
+        return
+    }
+
+
+}
